@@ -1,0 +1,62 @@
+require 'json'
+
+module Jsvars
+    def self.included(base)
+        base.send(:include, InstanceMethods)
+    end
+
+    module InstanceMethods
+        def jsvars
+            @jsvars = @jsvars || Hash.new
+        end        
+
+        def include_jsvars
+            jsvars = @jsvars
+            name = 'jsvars'
+            return unless jsvars
+            close_tag_index = response.body.index /<\/body>/i
+            js_assignments = []
+            jsvars.each do |variable, value|
+                js_assignments <<
+                    "
+                    if (typeof(#{ variable }) === 'object') {
+                        jsvars.objectExtend(#{ variable }, #{ value.to_json });
+                    }
+                    else {
+                        var #{ variable } = #{ value.to_json };
+                    }
+                    "    
+            end
+
+            added_HTML = 
+            # this really should be in its own .js file... but its so simple it almost seems pointless
+                "
+                <!-- added by the #{ name } plugin -->
+                <script>
+                var jsvars;
+                (function () {
+                    jsvars = {
+                        objectExtend: function (mainObject) {
+                            var i;
+                            for (i = 1; i < arguments.length; i += 1) {
+                                for (prop in arguments[i]){
+                                    if (arguments[i].hasOwnProperty(prop)) {
+                                        mainObject[prop] = arguments[i][prop];
+                                    }
+                                }
+                            }
+                            return mainObject;	
+                        } //end func
+                    }
+                }());
+
+                #{ js_assignments.join }
+
+                </script>
+                <!-- end #{ name } plugin code -->
+                ".gsub(/\t/, " ").squeeze(' ')
+                    
+            response.body.insert close_tag_index, added_HTML if close_tag_index
+        end            
+    end
+end
