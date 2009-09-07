@@ -1,13 +1,40 @@
 Jsvars
 ======
+Requires Json (require 'json')
 
-Introduction goes here.
+This rails plugin will hide the messiness of passing variables from rails into javascript. It will automatically add the js needed to create a variable you define in rails, or add variables to objects.
 
 
 Example
 =======
 
-Example goes here.
+in your controller:
+
+jsvars[:loginPath] = login_path
+    - Will create a global variable in the JS window object named 'loginPath' with the value you assigned.
+
+jsvars[:myObject] = {:title => "My Page", :email => "me@example.com"}
+    - Adds the object variables that can be used as myObject.title & myObject.email in the view javascipt.
+    - This will add the object "myObject" if it does not exist, if it already does, only the variables will be added to the already existing object.
+
+Example of extending an object:
+In controller:
+    jsvars[:login] = {:path => '/login'}
+    
+in view:
+<script>
+    var login = {
+        loginFuntion: function () {
+            // ....
+        },
+        specialVar: "My special Var"    
+    };
+</script>
+
+in JS:
+    login.loginFunction = function()
+    login.specialVar = 'My special Var'
+    login.path = '/login'
 
 
-Copyright (c) 2009 [name of plugin creator], released under the MIT license
+Copyright (c) 2009 Erick Schmitt, released under the MIT license
