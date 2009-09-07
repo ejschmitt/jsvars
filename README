@@ -14,7 +14,6 @@ Example
 =======
 
 in your controller:
-
 jsvars[:loginPath] = login_path
     - Will create a global variable in the JS window object named 'loginPath' with the value you assigned.
 
@@ -40,6 +39,32 @@ in JS:
     login.loginFunction = function()
     login.specialVar = 'My special Var'
     login.path = '/login'
+    
+Getting the rails environment in javascript for all pages 
+In ApplicationController:
+    before_filter :set_js_env
+    
+    def set_js_env
+        jsvars[:railsEnv] = RAILS_ENV
+    end
+    
+In JS
+    railsEnv = "development"
+    
+    
+What this solves
+=======
+This solves the mess of stuff like this:
+
+<script>
+    var loginPath = '<%= login_path %>';
+</script>
+(requiring the js to be left in an .html.erb file, or a .js.erb file)
+
+to simple adding:
+    jsvars[:loginPath] = login_path
+to the controller and allowing all js to be kept in .js files out of the html.
+This can get especially messy with objects with a few rails defines attributes.
 
 
-Copyright (c) 2009 Erick Schmitt, released under the MIT license
+
