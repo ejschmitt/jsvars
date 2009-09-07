@@ -1,8 +1,13 @@
 Jsvars
 ======
+This rails plugin will hide the messiness of passing variables from rails into javascript. It will automatically add the js needed to create a variable you define in rails, or add variables to objects.
+
+
+Install
+======
 Requires Json (require 'json')
 
-This rails plugin will hide the messiness of passing variables from rails into javascript. It will automatically add the js needed to create a variable you define in rails, or add variables to objects.
+./script/plugin install git://github.com/ejschmitt/jsvars.git
 
 
 Example
