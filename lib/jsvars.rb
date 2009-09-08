@@ -19,7 +19,18 @@ module Jsvars
             jsvars.each do |variable, value|
             js_assignments <<
                 if variable.to_s[/\./]
-                    "#{ variable } = #{ value.to_json };"
+                    # allows usage like jsvars['myObj.myVar.myValue] = "number"
+                    object_tests = ""
+                    possible_objects = variable.split('.') 
+                    possible_objects.each_with_index do |obj, i|
+                        full_obj = possible_objects[0..i].join('.')
+                        object_tests << 
+                            "if(#{ full_obj } === undefined) {
+                                #{ "var" if i == 0 } #{ full_obj } = {};
+                            }
+                            "
+                    end
+                    object_tests + "#{ variable } = #{ value.to_json };"
                 else
                     "if (typeof(#{ variable }) === 'object') {
                         jsvars.objExtend(#{ variable }, #{ value.to_json });
