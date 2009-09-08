@@ -10,7 +10,7 @@ Requires Json (require 'json')
 ./script/plugin install git://github.com/ejschmitt/jsvars.git
 
 
-Example
+Examples
 =======
 
 in your controller:
@@ -20,6 +20,10 @@ jsvars[:loginPath] = login_path
 jsvars[:myObject] = {:title => "My Page", :email => "me@example.com"}
     - Adds the object variables that can be used as myObject.title & myObject.email in the view javascipt.
     - This will add the object "myObject" if it does not exist, if it already does, only the variables will be added to the already existing object.
+
+jsvars['myObj.myMeth.myValue'] = "myVar"
+	- Adds the objects myObj, myMeth, myValue if they do not exist and defines the value of myObj.myMeth.myValue to myVar.
+	- Only undefined objects will be added, so if myObj exists but myMeth and myVal do not, they will be added to the myObj object.
 
 Example of extending an object:
 In controller:
