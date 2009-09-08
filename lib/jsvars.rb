@@ -17,9 +17,17 @@ module Jsvars
             close_tag_index = response.body.index /<\/body>/i
             js_assignments = []
             jsvars.each do |variable, value|
-                js_assignments <<
-"if (typeof(#{ variable }) === 'object') {jsvars.objExtend(#{ variable }, #{ value.to_json });}
-else {var #{ variable } = #{ value.to_json }};"    
+            js_assignments <<
+                if variable.to_s[/\./]
+                    "#{ variable } = #{ value.to_json };"
+                else
+                    "if (typeof(#{ variable }) === 'object') {
+                        jsvars.objExtend(#{ variable }, #{ value.to_json });
+                    }
+                    else {
+                        var #{ variable } = #{ value.to_json };
+                    }"    
+                end
             end
             
             methods = 
@@ -29,7 +37,7 @@ else {var #{ variable } = #{ value.to_json }};"
                         for (var i = 1; i < arguments.length; i += 1) {
                             for (prop in arguments[i]){
                                 if (arguments[i].hasOwnProperty(prop)) {
-                                    mainObject[prop] = arguments[i][prop];
+                                    mainObject[prop] = (arguments[i][prop]);
                                 }
                             }
                         }
