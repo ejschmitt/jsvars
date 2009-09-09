@@ -7,7 +7,7 @@ module Jsvars
 
     module InstanceMethods
         def jsvars
-            @jsvars = @jsvars || Hash.new
+            @jsvars ||= Hash.new
         end        
 
         def include_jsvars
@@ -17,31 +17,31 @@ module Jsvars
             close_tag_index = response.body.index /<\/body>/i
             js_assignments = []
             jsvars.each do |variable, value|
-            js_assignments <<
-                if variable.to_s[/\./]
-                    # allows usage like jsvars['myObj.myVar.myValue] = "number"
-                    object_tests = ""
-                    possible_objects = variable.split('.') 
-                    possible_objects.each_with_index do |obj, i|
-                        full_obj = possible_objects[0..i].join('.')
-                        object_tests <<
-"
-if(#{ full_obj } === undefined) {
-    #{ "var" if i == 0 } #{ full_obj } = {};
-}
-"
+                js_assignments <<
+                    if variable.to_s[/\./]
+                        # allows usage like jsvars['myObj.myVar.myValue'] = "number"
+                        object_tests = []
+                        objects = variable.split('.') 
+                        (0...objects.length - 1).each do |i|
+                            object_name = objects[0..i].join('.')
+                            object_tests <<
+                                "
+                                if (#{ object_name } === undefined) {
+                                    #{ "var" if i == 0 } #{ object_name } = {};
+                                }
+                                "
+                        end
+                        object_tests.join + "#{ variable } = #{ value.to_json };"
+                    else
+                        "
+                        if (typeof(#{ variable }) === 'object') {
+                            jsvars.objExtend(#{ variable }, #{ value.to_json });
+                        }
+                        else {
+                            var #{ variable } = #{ value.to_json };
+                        }
+                        "    
                     end
-                    object_tests + "#{ variable } = #{ value.to_json };"
-                else
-"
-if (typeof(#{ variable }) === 'object') {
-    jsvars.objExtend(#{ variable }, #{ value.to_json });
-}
-else {
-    var #{ variable } = #{ value.to_json };
-}
-"    
-                end
             end
             
             methods = 
