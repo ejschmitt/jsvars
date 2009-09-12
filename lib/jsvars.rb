@@ -13,8 +13,7 @@ module Jsvars
         def include_jsvars
             jsvars = @jsvars
             name = 'jsvars'
-            return unless jsvars
-            close_tag_index = response.body.index /<\/body>/i
+            return unless jsvars && response && response.content_type && response.content_type[/html|fbml/i]
             js_assignments = []
             jsvars.each do |variable, value|
                 js_assignments <<
@@ -61,15 +60,18 @@ module Jsvars
             '
             methods = methods.gsub(/\n|\r|\t/, ' ').squeeze(' ')
 
-            added_HTML = 
+            added_script = 
 "<!-- added by the #{ name } plugin -->
     <script type='text/javascript'>
         #{ methods } 
         #{ js_assignments.join } 
     </script>
 <!-- end #{ name } plugin code -->"
-                    
-            response.body.insert close_tag_index, added_HTML if close_tag_index
+            index = response.body.index(/<\/body>/i) || -1
+            response.body.insert index, added_script
         end            
     end
 end
+
+
+
