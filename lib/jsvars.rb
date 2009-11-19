@@ -6,14 +6,19 @@ module Jsvars
     end
 
     module InstanceMethods
-        def jsvars
-            @jsvars ||= Hash.new
-        end        
+      def jsvars(option = nil)
+          @jsvars ||= Hash.new
+          if option == false
+            @vars_off = true
+          end
+          @jsvars
+      end   
 
         def include_jsvars
             jsvars = @jsvars
             name = 'jsvars'
             return unless jsvars && response && response.content_type && response.content_type[/html|fbml/i]
+            return if @vars_off
             js_assignments = []
             jsvars.each do |variable, value|
                 js_assignments <<
@@ -67,8 +72,12 @@ module Jsvars
         #{ js_assignments.join } 
     </script>
 <!-- end #{ name } plugin code -->"
-            index = response.body.index(/<\/body>/i) || -1
-            response.body.insert index, added_script
+
+            if index = response.body.index /<\/body>/i
+                response.body.insert index, added_script
+            else
+                response.body << added_script
+            end
         end            
     end
 end
