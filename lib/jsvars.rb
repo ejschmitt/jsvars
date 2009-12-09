@@ -73,7 +73,7 @@ module Jsvars
     </script>
 <!-- end #{ name } plugin code -->"
 
-            if index = response.body.index /<\/body>/i
+            if index = response.body.index(/<\/body>/i)
                 response.body.insert index, added_script
             else
                 response.body << added_script
