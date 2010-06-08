@@ -1,0 +1,72 @@
+h1. Jsvars
+
+This rails plugin will hide the messiness of passing variables from rails into javascript. It will automatically add the js needed to create a variable you define in rails, or add variables to objects.
+
+
+h2. Install
+
+Requires Json (require 'json')
+
+<pre><code>./script/plugin install git://github.com/ejschmitt/jsvars.git</code></pre>
+
+h2. Examples
+
+in your controller:
+<pre><code>jsvars[:loginPath] = login_path</code></pre>
+* Will create a global variable in the JS window object named 'loginPath' with the value you assigned.
+
+<pre><code>jsvars[:myObject] = {:title => "My Page", :email => "me@example.com"}</code></pre>
+* Adds the object variables that can be used as myObject.title & myObject.email in the view javascipt.
+* This will add the object "myObject" if it does not exist, if it already does, only the variables will be added to the already existing object.
+
+<pre><code>jsvars['myObj.myMeth.myValue'] = "myVar"</code></pre>
+* Adds the objects myObj, myMeth, myValue if they do not exist and defines the value of myObj.myMeth.myValue to myVar.
+* Only undefined objects will be added, so if myObj exists but myMeth and myVal do not, they will be added to the myObj object.
+
+Example of extending an object:
+In controller:
+    <pre><code>jsvars[:login] = {:path => '/login'}</code></pre>
+in view:
+<pre><code><script>
+    var login = {
+        loginFuntion: function () {
+            // ....
+        },
+        specialVar: "My special Var"    
+    };
+</script></code></pre>
+
+in JS:
+    <pre><code>login.loginFunction = function()
+    login.specialVar = 'My special Var'
+    login.path = '/login'</code></pre>
+    
+Getting the rails environment in javascript for all pages 
+In ApplicationController:
+    <pre><code>before_filter :set_js_env
+    
+    def set_js_env
+        jsvars[:railsEnv] = RAILS_ENV
+    end</code></pre>
+    
+In JS
+    <pre><code>railsEnv = "development"</code></pre>
+
+
+h2. What this solves
+
+This solves the mess of stuff like this:
+
+<pre><code><script>
+    var loginPath = '<%= login_path %>';
+</script></code></pre>
+(requiring the js to be left in an .html.erb file, or a .js.erb file)
+
+to simple adding:
+    <pre><code>jsvars[:loginPath] = login_path</code></pre>
+to the controller and allowing all js to be kept in .js files out of the html.
+This can get especially messy with objects with a few rails defines attributes.
+
+h2. License 
+
+Copyright © 2010 Erick Schmitt, released under the MIT license.
